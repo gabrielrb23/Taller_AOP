@@ -15,20 +15,20 @@ import org.springframework.web.server.ResponseStatusException;
 public class GlobalException {
     private static final Logger log = LoggerFactory.getLogger(GlobalException.class);
 
-    // Captura cualquier excepción lanzada en controladores REST
     @Around("within(@org.springframework.web.bind.annotation.RestController *)")
     public Object handleControllerExceptions(ProceedingJoinPoint pjp) throws Throwable {
         try {
             return pjp.proceed();
+        } catch (EmailDuplicadoException | NotaInvalidaException | PorcentajeExcedidoException ex) {
+            log.warn("Excepción controlada en {}: {}", pjp.getSignature(), ex.getMessage());
+            return ResponseEntity.badRequest().body(ex.getMessage());
         } catch (ResponseStatusException ex) {
             log.error("Error en {}: {}", pjp.getSignature(), ex.getReason());
             throw ex;
         } catch (Exception ex) {
             log.error("Excepción no controlada en {}: {}", pjp.getSignature(), ex.getMessage(), ex);
-            // respuesta genérica 500
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Ocurrió un error interno");
         }
     }
 }
-

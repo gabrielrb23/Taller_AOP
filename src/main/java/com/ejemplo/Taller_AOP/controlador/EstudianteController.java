@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ejemplo.Taller_AOP.modelo.Estudiante;
 import com.ejemplo.Taller_AOP.repositorio.RepositorioEstudiante;
+import com.ejemplo.Taller_AOP.excepciones.EmailDuplicadoException;
 
 import java.net.URI;
 import java.util.List;
@@ -36,6 +37,9 @@ public class EstudianteController {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Estudiante> crear(@Valid @RequestBody Estudiante e) {
+        if (repo.findByCorreo(e.getCorreo()).isPresent()) {
+            throw new EmailDuplicadoException("El correo electrónico ya está registrado: " + e.getCorreo());
+        }
         Estudiante guardado = repo.save(e);
         URI uri = URI.create("/api/estudiantes/" + guardado.getId());
         return ResponseEntity.created(uri).body(guardado);
@@ -47,9 +51,13 @@ public class EstudianteController {
     public ResponseEntity<Estudiante> actualizar(
             @PathVariable Long id,
             @Valid @RequestBody Estudiante e) {
+        if (repo.findByCorreo(e.getCorreo()).isPresent() && !repo.findById(id).map(Estudiante::getCorreo).orElse("").equals(e.getCorreo())) {
+            throw new EmailDuplicadoException("El correo electrónico ya está registrado: " + e.getCorreo());
+        }
         return repo.findById(id)
                 .map(orig -> {
                     e.setId(id);
+                    e.setNotas(orig.getNotas()); // Preservar las notas existentes
                     return ResponseEntity.ok(repo.save(e));
                 })
                 .orElse(ResponseEntity.notFound().build());
