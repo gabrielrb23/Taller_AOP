@@ -19,7 +19,7 @@ public class GlobalException {
     public Object handleControllerExceptions(ProceedingJoinPoint pjp) throws Throwable {
         try {
             return pjp.proceed();
-        } catch (EmailDuplicadoException | NotaInvalidaException | PorcentajeExcedidoException ex) {
+        } catch (EmailDuplicadoException ex) {
             log.warn("Excepción controlada en {}: {}", pjp.getSignature(), ex.getMessage());
             return ResponseEntity.badRequest().body(ex.getMessage());
         } catch (ResponseStatusException ex) {
@@ -32,3 +32,4 @@ public class GlobalException {
         }
     }
 }
+

@@ -24,8 +24,7 @@ public class NotaController {
 
     // Listar todas, o filtrar por estudianteId
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Nota> listar(
-            @RequestParam(name = "estudianteId", required = false) Long estudianteId) {
+    public List<Nota> listar(@RequestParam(name = "estudianteId", required = false) Long estudianteId) {
         if (estudianteId != null) {
             return repoNota.findByEstudianteId(estudianteId);
         }
@@ -41,8 +40,7 @@ public class NotaController {
     }
 
     // Crear nueva nota, con manejo de duplicados
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Nota> crear(@Valid @RequestBody Nota n) {
         try {
             Nota guardada = repoNota.save(n);
@@ -59,12 +57,8 @@ public class NotaController {
     }
 
     // Actualizar existente, también capturando duplicados
-    @PutMapping(path = "/{id}",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Nota> actualizar(
-            @PathVariable Long id,
-            @Valid @RequestBody Nota n) {
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Nota> actualizar(@PathVariable Long id, @Valid @RequestBody Nota n) {
         return repoNota.findById(id)
                 .map(orig -> {
                     n.setId(id);
@@ -94,8 +88,7 @@ public class NotaController {
     }
 
     // Promedio ponderado
-    @GetMapping(path = "/promedio/{estudianteId}",
-            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/promedio/{estudianteId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Double> promedio(@PathVariable Long estudianteId) {
         List<Nota> notas = repoNota.findByEstudianteId(estudianteId);
         double prom = notas.stream()

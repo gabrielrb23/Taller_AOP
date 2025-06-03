@@ -19,6 +19,7 @@ button {
     margin: 10px;
     cursor: pointer;
     border-radius: 5px;
+    width: 150px; /* Ajusta el ancho de ambos botones */
 }
 
 button:hover {
@@ -67,8 +68,4 @@ input, select {
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 5px;
-}
-
-button[type="submit"] {
-    width: 100%;
 }

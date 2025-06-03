@@ -18,7 +18,7 @@
 
 <script>
     const token = localStorage.getItem('token');
-    const rol   = localStorage.getItem('rol');
+    const rol = localStorage.getItem('rol');
     const headers = { 'Authorization':'Bearer '+token, 'Content-Type':'application/json' };
 
     if (!token) {
@@ -29,7 +29,7 @@
     }
 
     const params = new URLSearchParams(location.search);
-    const id    = params.get('id');
+    const id = params.get('id');
     const estId = params.get('estudianteId');
 
     if (!estId) {
@@ -41,32 +41,59 @@
         fetch(`/api/notas/${id}`, { headers })
             .then(r=>r.json())
             .then(n => {
-                document.getElementById('materia').value     = n.materia;
+                document.getElementById('materia').value = n.materia;
                 document.getElementById('observacion').value = n.observacion;
-                document.getElementById('valor').value       = n.valor;
-                document.getElementById('porcentaje').value  = n.porcentaje;
+                document.getElementById('valor').value = n.valor;
+                document.getElementById('porcentaje').value = n.porcentaje;
             });
     }
 
     document.getElementById('form-nota')
-        .addEventListener('submit', e => {
+        .addEventListener('submit', async e => {
             e.preventDefault();
+            const valor = parseFloat(document.getElementById('valor').value);
+            const porcentaje = parseFloat(document.getElementById('porcentaje').value);
+
+            try {
+                const materia = document.getElementById('materia').value;
+                const responseMateria = await fetch(`/api/notas?estudianteId=${estId}`, { headers });
+                const notasMateria = await responseMateria.json();
+
+                if (notasMateria.some(nota => nota.materia === materia && nota.id !== id)) {
+                    throw new Error('El nombre de la materia debe ser único.');
+                }
+
+                if (valor < 0 || valor > 5) {
+                    throw new Error('La nota debe estar en el rango de 0 a 5.');
+                }
+                const response = await fetch(`/api/notas?estudianteId=${estId}`, { headers });
+                const notas = await response.json();
+                const sumaPorcentajes = notas.reduce((acc, nota) => acc + nota.porcentaje, 0) + porcentaje;
+
+                if (sumaPorcentajes > 100) {
+                    throw new Error('La sumatoria de los porcentajes no puede exceder 100.');
+                }
+            } catch (e) {
+                alert(e.message);
+                return;
+            }
+
             const nota = {
-                materia:     document.getElementById('materia').value,
+                materia: document.getElementById('materia').value,
                 observacion: document.getElementById('observacion').value,
-                valor:       parseFloat(document.getElementById('valor').value),
-                porcentaje:  parseFloat(document.getElementById('porcentaje').value),
-                estudiante:  { id: parseInt(estId, 10) }
+                valor,
+                porcentaje,
+                estudiante: { id: parseInt(estId, 10) }
             };
-            const method = id?'PUT':'POST';
-            const url    = id?`/api/notas/${id}`:'/api/notas';
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/notas/${id}` : '/api/notas';
             fetch(url, { method, headers, body: JSON.stringify(nota) })
                 .then(r => {
-                    if (!r.ok) return r.text().then(t=>{throw new Error(t)});
+                    if (!r.ok) return r.text().then(t => { throw new Error(t); });
                     return r.json();
                 })
-                .then(()=> location.href='notas.html')
-                .catch(err=> alert(err.message));
+                .then(() => location.href = 'notas.html')
+                .catch(err => alert(err.message));
         });
 
     function cancelar() {
