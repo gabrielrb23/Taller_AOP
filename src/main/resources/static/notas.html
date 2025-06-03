@@ -17,9 +17,13 @@
 
 <table border="1">
   <thead>
-  <tr>
-    <th>Materia</th><th>Observación</th><th>Valor</th><th>%</th><th>Acciones</th>
-  </tr>
+    <tr>
+      <th>Materia</th>
+      <th>Observación</th>
+      <th>Valor</th>
+      <th>%</th>
+      <th id="th-acciones">Acciones</th>
+    </tr>
   </thead>
   <tbody id="tabla-notas"></tbody>
 </table>
@@ -37,63 +41,92 @@
 
   document.getElementById('rol').textContent = rol;
 
-  const headers = { 'Authorization':'Bearer '+token, 'Content-Type':'application/json' };
+  // Mostrar nombre y apellido del estudiante inmediatamente si están en localStorage
+  const estNombre = localStorage.getItem('estudianteNombre');
+  const estApellido = localStorage.getItem('estudianteApellido');
+  if (estNombre && estApellido) {
+    document.getElementById('est-nombre').textContent = estNombre;
+    document.getElementById('est-apellido').textContent = estApellido;
+  }
 
-  // Un alumno no puede crear notas
-  if (rol==='ALUMNO') {
+  const headers = {
+    'Authorization': 'Bearer ' + token,
+    'Content-Type': 'application/json'
+  };
+
+  // Si es ALUMNO, obtener los datos del estudiante
+  if (rol === 'ALUMNO') {
     document.getElementById('btn-nueva').style.display = 'none';
-    fetch(`/api/estudiantes/${estId}`, { headers })
-      .then(r => r.json())
-      .then(est => {
-        localStorage.setItem('estudianteNombre', est.nombre);
-        localStorage.setItem('estudianteApellido', est.apellido);
-        document.getElementById('est-nombre').textContent = est.nombre;
-        document.getElementById('est-apellido').textContent = est.apellido;
-      });
+    document.getElementById('th-acciones').style.display = 'none';
+
+    // Solo obtener datos del estudiante si no están en localStorage
+    if (!estNombre || !estApellido) {
+      fetch(`/api/estudiantes/${estId}`, { headers })
+        .then(r => r.json())
+        .then(est => {
+          localStorage.setItem('estudianteNombre', est.nombre);
+          localStorage.setItem('estudianteApellido', est.apellido);
+          document.getElementById('est-nombre').textContent = est.nombre;
+          document.getElementById('est-apellido').textContent = est.apellido;
+        });
+    }
   } else {
     document.getElementById('btn-nueva')
-            .addEventListener('click', () => location.href=`editar-nota.html?estudianteId=${estId}`);
+            .addEventListener('click', () => location.href = `editar-nota.html?estudianteId=${estId}`);
+    
+    // Si es profesor y no hay nombre en localStorage, obtenerlo
+    if (!estNombre || !estApellido) {
+      fetch(`/api/estudiantes/${estId}`, { headers })
+        .then(r => r.json())
+        .then(est => {
+          document.getElementById('est-nombre').textContent = est.nombre;
+          document.getElementById('est-apellido').textContent = est.apellido;
+        });
+    }
   }
 
-  // Carga las notas del estudiante
   function loadNotas() {
     fetch(`/api/notas?estudianteId=${estId}`, { headers })
-            .then(r=>r.json())
-            .then(data => {
-              const tbody = document.getElementById('tabla-notas');
-              tbody.innerHTML = '';
-              data.forEach(n => {
-                const acciones = (rol==='ALUMNO')
-                        ? ''
-                        : `<button onclick="editar(${n.id})">Editar</button>
-               <button onclick="borrar(${n.id})">Eliminar</button>`;
-                tbody.innerHTML += `
+      .then(r => r.json())
+      .then(data => {
+        const tbody = document.getElementById('tabla-notas');
+        tbody.innerHTML = '';
+        data.forEach(n => {
+          const acciones = `
+            <button onclick="editar(${n.id})">Editar</button>
+            <button onclick="borrar(${n.id})">Eliminar</button>
+          `;
+          tbody.innerHTML += `
             <tr>
               <td>${n.materia}</td>
-              <td>${n.observacion||''}</td>
+              <td>${n.observacion || ''}</td>
               <td>${n.valor}</td>
               <td>${n.porcentaje}</td>
-              <td>${acciones}</td>
+              ${rol !== 'ALUMNO' ? `<td>${acciones}</td>` : ''}
             </tr>`;
-              });
-            });
+        });
+      });
   }
+
   loadNotas();
 
   function editar(id) {
     location.href = `editar-nota.html?id=${id}&estudianteId=${estId}`;
   }
+
   function borrar(id) {
-    fetch(`/api/notas/${id}`, { method:'DELETE', headers })
-            .then(()=>loadNotas());
+    fetch(`/api/notas/${id}`, { method: 'DELETE', headers })
+      .then(() => loadNotas());
   }
 
   document.getElementById('btn-prom')
-          .addEventListener('click', () => {
-            fetch(`/api/notas/promedio/${estId}`, { headers })
-                    .then(r=>r.json())
-                    .then(p => document.getElementById('promedio').textContent = 'Promedio: ' + p);
-          });
+    .addEventListener('click', () => {
+      fetch(`/api/notas/promedio/${estId}`, { headers })
+        .then(r => r.json())
+        .then(p => {
+          document.getElementById('promedio').textContent = 'Promedio: ' + p;
+        });
+    });
 </script>
 </body>
 </html>
