@@ -36,14 +36,20 @@
   }
 
   document.getElementById('rol').textContent = rol;
-  document.getElementById('est-nombre').textContent= localStorage.getItem('estudianteNombre');
-  document.getElementById('est-apellido').textContent= localStorage.getItem('estudianteApellido');
 
   const headers = { 'Authorization':'Bearer '+token, 'Content-Type':'application/json' };
 
   // Un alumno no puede crear notas
   if (rol==='ALUMNO') {
     document.getElementById('btn-nueva').style.display = 'none';
+    fetch(`/api/estudiantes/${estId}`, { headers })
+      .then(r => r.json())
+      .then(est => {
+        localStorage.setItem('estudianteNombre', est.nombre);
+        localStorage.setItem('estudianteApellido', est.apellido);
+        document.getElementById('est-nombre').textContent = est.nombre;
+        document.getElementById('est-apellido').textContent = est.apellido;
+      });
   } else {
     document.getElementById('btn-nueva')
             .addEventListener('click', () => location.href=`editar-nota.html?estudianteId=${estId}`);

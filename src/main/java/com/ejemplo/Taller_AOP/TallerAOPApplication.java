@@ -6,8 +6,8 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 @SpringBootApplication
 @EnableAspectJAutoProxy
-public class NotasAppApplication {
+public class TallerAOPApplication {
     public static void main(String[] args) {
-        SpringApplication.run(NotasAppApplication.class, args);
+        SpringApplication.run(TallerAOPApplication.class, args);
     }
 }

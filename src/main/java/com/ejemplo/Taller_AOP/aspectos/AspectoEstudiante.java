@@ -29,11 +29,13 @@ public class AspectoEstudiante {
         String role  = Jwt.getRole(token);
 
         if ("ALUMNO".equals(role)) {
-            // Ni una sola operación en EstudianteController queda permitida
+            // Permite solo el método 'obtener'
             String method = pjp.getSignature().getName();
-            log.warn("ALUMNO intentando {} en EstudianteController", method);
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "No tienes permiso para acceder a estudiantes");
+            if (!"obtener".equals(method)) {
+                log.warn("ALUMNO intentando {} en EstudianteController", method);
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "No tienes permiso para acceder a estudiantes");
+            }
         }
 
         // PROFESOR u otro rol: deja proceder
