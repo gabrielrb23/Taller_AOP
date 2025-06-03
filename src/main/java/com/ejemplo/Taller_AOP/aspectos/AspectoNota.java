@@ -18,7 +18,7 @@ import org.springframework.web.context.request.*;
 public class AspectoNota {
     private static final Logger log = LoggerFactory.getLogger(AspectoNota.class);
 
-    @Around("execution(* com.ejemplo.notasapp.controlador.NotaController.*(..))")
+    @Around("execution(* com.ejemplo.Taller_AOP.controlador.NotaController.*(..))")
     public Object checkNotaSecurity(ProceedingJoinPoint pjp) throws Throwable {
         HttpServletRequest req = ((ServletRequestAttributes)
                 RequestContextHolder.currentRequestAttributes()).getRequest();
@@ -33,16 +33,16 @@ public class AspectoNota {
         String method = pjp.getSignature().getName();
 
         if ("ALUMNO".equals(role)) {
-            // Solo permite el método 'promedio' y solo sobre su propio ID
-            if (!"promedio".equals(method)) {
+            // Solo permite los métodos 'promedio' y 'listarNotas' y solo sobre su propio ID
+            if (!"promedio".equals(method) && !"listar".equals(method)) {
                 log.warn("ALUMNO intentando método prohibido en Notas: {}", method);
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acceso denegado");
             }
             // Verifica que el primer argumento (studentId) coincida con su propio userId
             Object[] args = pjp.getArgs();
             if (args.length == 0 || !(args[0] instanceof Long) || !userId.equals((Long) args[0])) {
-                log.warn("ALUMNO {} intentando ver promedio de otro: {}", userId, args.length>0? args[0] : null);
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Sólo puedes ver tu promedio");
+                log.warn("ALUMNO {} intentando acceder a notas de otro: {}", userId, args.length > 0 ? args[0] : null);
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Sólo puedes acceder a tus notas");
             }
         }
 

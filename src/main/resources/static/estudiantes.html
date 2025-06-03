@@ -7,7 +7,9 @@
 </head>
 <body>
 <h1>Estudiantes (<span id="rol"></span>)</h1>
+
 <button id="btn-nuevo">Crear Nuevo Estudiante</button>
+<button id="btn-volver">Volver al Selector de Roles</button>
 <table border="1">
   <thead>
   <tr><th>Nombre</th><th>Apellido</th><th>Correo</th><th>Acciones</th></tr>
@@ -30,8 +32,10 @@
 
   document.getElementById('btn-nuevo')
           .addEventListener('click', () => location.href = 'editar-estudiante.html');
+  document.getElementById('btn-volver')
+          .addEventListener('click', () => location.href = 'role-selection.html');
 
-  // Listar
+  // Metodo para obtener estudiantes
   fetch('/api/estudiantes', { headers })
           .then(r => r.json())
           .then(data => {
@@ -45,7 +49,7 @@
           <td>
             <button onclick="editar(${est.id})">Editar</button>
             <button onclick="borrar(${est.id})">Eliminar</button>
-            <button onclick="verNotas(${est.id}, '${est.nombre}', '${est.apellido}')">Notas</button>
+            <button onclick="verNotas(${est.id}, '${est.nombre}', '${est.apellido}')">Ver Notas</button>
           </td>`;
               tbody.appendChild(tr);
             });

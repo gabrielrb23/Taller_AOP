@@ -38,7 +38,6 @@
                     localStorage.setItem('token', token);
                     localStorage.setItem('rol', role);
                     localStorage.setItem('estudianteId', userId);
-                    // redirige ALUMNO a notas, PROFESOR a listado de estudiantes
                     location.href = (role === 'ALUMNO') ? 'notas.html' : 'estudiantes.html';
                 })
                 .catch(err => alert(err.message));

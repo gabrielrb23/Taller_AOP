@@ -17,7 +17,7 @@ import org.springframework.web.context.request.*;
 public class AspectoEstudiante {
     private static final Logger log = LoggerFactory.getLogger(AspectoEstudiante.class);
 
-    @Around("execution(* com.ejemplo.notasapp.controlador.EstudianteController.*(..))")
+    @Around("execution(* com.ejemplo.Taller_AOP.controlador.EstudianteController.*(..))")
     public Object checkEstudianteSecurity(ProceedingJoinPoint pjp) throws Throwable {
         HttpServletRequest req = ((ServletRequestAttributes)
                 RequestContextHolder.currentRequestAttributes()).getRequest();

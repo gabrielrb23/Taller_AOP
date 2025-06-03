@@ -35,13 +35,13 @@
     location.href='role-selection.html';
   }
 
-  document.getElementById('rol').textContent       = rol;
+  document.getElementById('rol').textContent = rol;
   document.getElementById('est-nombre').textContent= localStorage.getItem('estudianteNombre');
   document.getElementById('est-apellido').textContent= localStorage.getItem('estudianteApellido');
 
   const headers = { 'Authorization':'Bearer '+token, 'Content-Type':'application/json' };
 
-  // ALUMNO no puede crear ni ver botones de edición/borrado
+  // Un alumno no puede crear notas
   if (rol==='ALUMNO') {
     document.getElementById('btn-nueva').style.display = 'none';
   } else {
@@ -49,7 +49,7 @@
             .addEventListener('click', () => location.href=`editar-nota.html?estudianteId=${estId}`);
   }
 
-  // Cargar
+  // Carga las notas del estudiante
   function loadNotas() {
     fetch(`/api/notas?estudianteId=${estId}`, { headers })
             .then(r=>r.json())
