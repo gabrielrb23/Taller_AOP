@@ -59,30 +59,24 @@
     document.getElementById('btn-nueva').style.display = 'none';
     document.getElementById('th-acciones').style.display = 'none';
 
-    // Solo obtener datos del estudiante si no están en localStorage
-    if (!estNombre || !estApellido) {
-      fetch(`/api/estudiantes/${estId}`, { headers })
-        .then(r => r.json())
-        .then(est => {
-          localStorage.setItem('estudianteNombre', est.nombre);
-          localStorage.setItem('estudianteApellido', est.apellido);
-          document.getElementById('est-nombre').textContent = est.nombre;
-          document.getElementById('est-apellido').textContent = est.apellido;
-        });
-    }
+    // Obtener datos del estudiante desde la API
+    fetch(`/api/estudiantes/${estId}`, { headers })
+      .then(r => r.json())
+      .then(est => {
+        document.getElementById('est-nombre').textContent = est.nombre;
+        document.getElementById('est-apellido').textContent = est.apellido;
+      });
   } else {
     document.getElementById('btn-nueva')
             .addEventListener('click', () => location.href = `editar-nota.html?estudianteId=${estId}`);
-    
+
     // Si es profesor y no hay nombre en localStorage, obtenerlo
-    if (!estNombre || !estApellido) {
-      fetch(`/api/estudiantes/${estId}`, { headers })
-        .then(r => r.json())
-        .then(est => {
-          document.getElementById('est-nombre').textContent = est.nombre;
-          document.getElementById('est-apellido').textContent = est.apellido;
-        });
-    }
+    fetch(`/api/estudiantes/${estId}`, { headers })
+      .then(r => r.json())
+      .then(est => {
+        document.getElementById('est-nombre').textContent = est.nombre;
+        document.getElementById('est-apellido').textContent = est.apellido;
+      });
   }
 
   function loadNotas() {
