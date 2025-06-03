@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Notas</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1>
+  Notas de
+  <span id="est-nombre"></span>
+  <span id="est-apellido"></span>
+  (<span id="rol"></span>)
+</h1>
+<button onclick="location.href=(rol==='ALUMNO'?'role-selection.html':'estudiantes.html')">Volver</button>
+<button id="btn-nueva">Nueva Nota</button>
+
+<table border="1">
+  <thead>
+  <tr>
+    <th>Materia</th><th>Observación</th><th>Valor</th><th>%</th><th>Acciones</th>
+  </tr>
+  </thead>
+  <tbody id="tabla-notas"></tbody>
+</table>
+
+<button id="btn-prom">Calcular Promedio</button>
+<div id="promedio"></div>
+
+<script>
+  const token = localStorage.getItem('token');
+  const rol   = localStorage.getItem('rol');
+  const estId = localStorage.getItem('estudianteId');
+  if (!token) {
+    location.href='role-selection.html';
+  }
+
+  document.getElementById('rol').textContent       = rol;
+  document.getElementById('est-nombre').textContent= localStorage.getItem('estudianteNombre');
+  document.getElementById('est-apellido').textContent= localStorage.getItem('estudianteApellido');
+
+  const headers = { 'Authorization':'Bearer '+token, 'Content-Type':'application/json' };
+
+  // ALUMNO no puede crear ni ver botones de edición/borrado
+  if (rol==='ALUMNO') {
+    document.getElementById('btn-nueva').style.display = 'none';
+  } else {
+    document.getElementById('btn-nueva')
+            .addEventListener('click', () => location.href=`editar-nota.html?estudianteId=${estId}`);
+  }
+
+  // Cargar
+  function loadNotas() {
+    fetch(`/api/notas?estudianteId=${estId}`, { headers })
+            .then(r=>r.json())
+            .then(data => {
+              const tbody = document.getElementById('tabla-notas');
+              tbody.innerHTML = '';
+              data.forEach(n => {
+                const acciones = (rol==='ALUMNO')
+                        ? ''
+                        : `<button onclick="editar(${n.id})">Editar</button>
+               <button onclick="borrar(${n.id})">Eliminar</button>`;
+                tbody.innerHTML += `
+            <tr>
+              <td>${n.materia}</td>
+              <td>${n.observacion||''}</td>
+              <td>${n.valor}</td>
+              <td>${n.porcentaje}</td>
+              <td>${acciones}</td>
+            </tr>`;
+              });
+            });
+  }
+  loadNotas();
+
+  function editar(id) {
+    location.href = `editar-nota.html?id=${id}&estudianteId=${estId}`;
+  }
+  function borrar(id) {
+    fetch(`/api/notas/${id}`, { method:'DELETE', headers })
+            .then(()=>loadNotas());
+  }
+
+  document.getElementById('btn-prom')
+          .addEventListener('click', () => {
+            fetch(`/api/notas/promedio/${estId}`, { headers })
+                    .then(r=>r.json())
+                    .then(p => document.getElementById('promedio').textContent = 'Promedio: ' + p);
+          });
+</script>
+</body>
+</html>

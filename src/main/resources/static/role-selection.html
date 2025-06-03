@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Seleccione Rol</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1>Identifícate</h1>
+<form id="form-login">
+    <label>ID de usuario: <input id="userId" required></label><br>
+    <label>Rol:
+        <select id="role">
+            <option value="ALUMNO">Estudiante</option>
+            <option value="PROFESOR">Profesor</option>
+        </select>
+    </label><br>
+    <button type="submit">Entrar</button>
+</form>
+
+<script>
+    document.getElementById('form-login')
+        .addEventListener('submit', e => {
+            e.preventDefault();
+            const userId = document.getElementById('userId').value;
+            const role   = document.getElementById('role').value;
+
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type':'application/json' },
+                body: JSON.stringify({ userId, role })
+            })
+                .then(r => {
+                    if (!r.ok) throw new Error('Credenciales inválidas');
+                    return r.json();
+                })
+                .then(({ token }) => {
+                    localStorage.setItem('token', token);
+                    localStorage.setItem('rol', role);
+                    localStorage.setItem('estudianteId', userId);
+                    // redirige ALUMNO a notas, PROFESOR a listado de estudiantes
+                    location.href = (role === 'ALUMNO') ? 'notas.html' : 'estudiantes.html';
+                })
+                .catch(err => alert(err.message));
+        });
+</script>
+</body>
+</html>

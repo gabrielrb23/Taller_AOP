@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Estudiante</title>
+    <link rel="stylesheet" href="styles.css">    
+</head>
+<body>
+<h1 id="titulo">Nuevo Estudiante</h1>
+<form id="form-estudiante">
+    <label>Nombre:<input id="nombre" required></label><br>
+    <label>Apellido:<input id="apellido" required></label><br>
+    <label>Correo:<input id="correo" type="email" required></label><br>
+    <button type="submit">Guardar</button>
+    <button type="button" onclick="cancelar()">Cancelar</button>
+</form>
+
+<script>
+    const token = localStorage.getItem('token');
+    const role  = localStorage.getItem('rol');
+    if (!token) {
+        location.href='role-selection.html';
+    }
+    if (role==='ALUMNO') {
+        location.href='estudiantes.html';
+    }
+
+    const headers = { 'Authorization':'Bearer '+token, 'Content-Type':'application/json' };
+    const params = new URLSearchParams(location.search);
+    const id     = params.get('id');
+    if (id) {
+        document.getElementById('titulo').textContent='Editar Estudiante';
+        fetch(`/api/estudiantes/${id}`, { headers })
+            .then(r=>r.json())
+            .then(est=>{
+                document.getElementById('nombre').value  = est.nombre;
+                document.getElementById('apellido').value= est.apellido;
+                document.getElementById('correo').value  = est.correo;
+            });
+    }
+
+    document.getElementById('form-estudiante')
+        .addEventListener('submit', e => {
+            e.preventDefault();
+            const eObj = {
+                nombre:  document.getElementById('nombre').value,
+                apellido:document.getElementById('apellido').value,
+                correo:  document.getElementById('correo').value
+            };
+            const method = id?'PUT':'POST';
+            const url    = id?`/api/estudiantes/${id}`:'/api/estudiantes';
+            fetch(url, { method, headers, body: JSON.stringify(eObj) })
+                .then(r=>{
+                    if(!r.ok) return r.text().then(t=>{throw new Error(t)});
+                    return r.json();
+                })
+                .then(()=>location.href='estudiantes.html')
+                .catch(err=>alert(err.message));
+        });
+
+    function cancelar() {
+        location.href='estudiantes.html';
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Nota</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1 id="titulo">Nueva Nota</h1>
+<form id="form-nota">
+    <label>Materia:<input id="materia" required></label><br>
+    <label>Observación:<input id="observacion"></label><br>
+    <label>Valor:<input id="valor" type="number" step="0.1" required></label><br>
+    <label>Porcentaje:<input id="porcentaje" type="number" required></label><br>
+    <button type="submit">Guardar</button>
+    <button type="button" onclick="cancelar()">Cancelar</button>
+</form>
+
+<script>
+    const token = localStorage.getItem('token');
+    const rol   = localStorage.getItem('rol');
+    const headers = { 'Authorization':'Bearer '+token, 'Content-Type':'application/json' };
+
+    if (!token) {
+        location.href='role-selection.html';
+    }
+    if (rol==='ALUMNO') {
+        location.href='notas.html';
+    }
+
+    const params = new URLSearchParams(location.search);
+    const id    = params.get('id');
+    const estId = params.get('estudianteId');
+
+    if (!estId) {
+        alert('Falta un estudiante seleccionado');
+        location.href='estudiantes.html';
+    }
+    if (id) {
+        document.getElementById('titulo').textContent = 'Editar Nota';
+        fetch(`/api/notas/${id}`, { headers })
+            .then(r=>r.json())
+            .then(n => {
+                document.getElementById('materia').value     = n.materia;
+                document.getElementById('observacion').value = n.observacion;
+                document.getElementById('valor').value       = n.valor;
+                document.getElementById('porcentaje').value  = n.porcentaje;
+            });
+    }
+
+    document.getElementById('form-nota')
+        .addEventListener('submit', e => {
+            e.preventDefault();
+            const nota = {
+                materia:     document.getElementById('materia').value,
+                observacion: document.getElementById('observacion').value,
+                valor:       parseFloat(document.getElementById('valor').value),
+                porcentaje:  parseFloat(document.getElementById('porcentaje').value),
+                estudiante:  { id: parseInt(estId, 10) }
+            };
+            const method = id?'PUT':'POST';
+            const url    = id?`/api/notas/${id}`:'/api/notas';
+            fetch(url, { method, headers, body: JSON.stringify(nota) })
+                .then(r => {
+                    if (!r.ok) return r.text().then(t=>{throw new Error(t)});
+                    return r.json();
+                })
+                .then(()=> location.href='notas.html')
+                .catch(err=> alert(err.message));
+        });
+
+    function cancelar() {
+        location.href='notas.html';
+    }
+</script>
+</body>
+</html>

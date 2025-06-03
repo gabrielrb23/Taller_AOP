@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Estudiantes</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1>Estudiantes (<span id="rol"></span>)</h1>
+<button id="btn-nuevo">Crear Nuevo Estudiante</button>
+<table border="1">
+  <thead>
+  <tr><th>Nombre</th><th>Apellido</th><th>Correo</th><th>Acciones</th></tr>
+  </thead>
+  <tbody id="tabla-estudiantes"></tbody>
+</table>
+
+<script>
+  const token = localStorage.getItem('token');
+  const role  = localStorage.getItem('rol');
+  if (!token) {
+    location.href = 'role-selection.html';
+  }
+  if (role === 'ALUMNO') {
+    location.href = 'notas.html';
+  }
+
+  document.getElementById('rol').textContent = role;
+  const headers = { 'Authorization': 'Bearer ' + token };
+
+  document.getElementById('btn-nuevo')
+          .addEventListener('click', () => location.href = 'editar-estudiante.html');
+
+  // Listar
+  fetch('/api/estudiantes', { headers })
+          .then(r => r.json())
+          .then(data => {
+            const tbody = document.getElementById('tabla-estudiantes');
+            data.forEach(est => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+          <td>${est.nombre}</td>
+          <td>${est.apellido}</td>
+          <td>${est.correo}</td>
+          <td>
+            <button onclick="editar(${est.id})">Editar</button>
+            <button onclick="borrar(${est.id})">Eliminar</button>
+            <button onclick="verNotas(${est.id}, '${est.nombre}', '${est.apellido}')">Notas</button>
+          </td>`;
+              tbody.appendChild(tr);
+            });
+          });
+
+  function editar(id) {
+    location.href = `editar-estudiante.html?id=${id}`;
+  }
+  function borrar(id) {
+    fetch(`/api/estudiantes/${id}`, {
+      method: 'DELETE',
+      headers
+    }).then(() => location.reload());
+  }
+  function verNotas(id, nombre, apellido) {
+    localStorage.setItem('estudianteNombre', nombre);
+    localStorage.setItem('estudianteApellido', apellido);
+    localStorage.setItem('estudianteId', id);
+    location.href = 'notas.html';
+  }
+</script>
+</body>
+</html>
