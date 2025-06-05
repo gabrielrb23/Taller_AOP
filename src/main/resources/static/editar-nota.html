@@ -59,16 +59,23 @@
                 const responseMateria = await fetch(`/api/notas?estudianteId=${estId}`, { headers });
                 const notasMateria = await responseMateria.json();
 
-                if (notasMateria.some(nota => nota.materia === materia && nota.id !== id)) {
+                // Validación modificada para permitir edición
+                const notaExistente = notasMateria.find(nota => nota.materia === materia);
+                if (notaExistente && (!id || notaExistente.id !== parseInt(id, 10))) {
                     throw new Error('El nombre de la materia debe ser único.');
                 }
 
                 if (valor < 0 || valor > 5) {
                     throw new Error('La nota debe estar en el rango de 0 a 5.');
                 }
+                
                 const response = await fetch(`/api/notas?estudianteId=${estId}`, { headers });
                 const notas = await response.json();
-                const sumaPorcentajes = notas.reduce((acc, nota) => acc + nota.porcentaje, 0) + porcentaje;
+                
+                // Calcular suma de porcentajes excluyendo la nota actual si estamos editando
+                const sumaPorcentajes = notas.reduce((acc, nota) => {
+                    return acc + (id && nota.id === parseInt(id, 10) ? 0 : nota.porcentaje);
+                }, 0) + porcentaje;
 
                 if (sumaPorcentajes > 100) {
                     throw new Error('La sumatoria de los porcentajes no puede exceder 100.');

@@ -39,7 +39,6 @@ public class AspectoNota {
             }
         }
 
-        // PROFESOR o cualquier otro rol válido: deja proceder
         return pjp.proceed();
     }
 }
