@@ -28,21 +28,14 @@ public class AspectoNota {
         }
 
         String token = auth.substring(7);
-        Long userId = Jwt.getUserId(token);
         String role   = Jwt.getRole(token);
         String method = pjp.getSignature().getName();
 
         if ("ALUMNO".equals(role)) {
-            // Solo permite los métodos 'promedio' y 'listarNotas' y solo sobre su propio ID
+            // Solo permite los métodos 'promedio' y 'listarNotas'
             if (!"promedio".equals(method) && !"listar".equals(method)) {
-                log.warn("ALUMNO intentando método prohibido en Notas: {}", method);
+                log.warn("ALUMNO intentando metodo prohibido en Notas: {}", method);
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acceso denegado");
-            }
-            // Verifica que el primer argumento (studentId) coincida con su propio userId
-            Object[] args = pjp.getArgs();
-            if (args.length == 0 || !(args[0] instanceof Long) || !userId.equals((Long) args[0])) {
-                log.warn("ALUMNO {} intentando acceder a notas de otro: {}", userId, args.length > 0 ? args[0] : null);
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Sólo puedes acceder a tus notas");
             }
         }
 

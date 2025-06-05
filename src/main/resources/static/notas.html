@@ -12,6 +12,8 @@
   <span id="est-apellido"></span>
   (<span id="rol"></span>)
 </h1>
+
+<!-- Botones disponibles para todos -->
 <button onclick="location.href=(rol==='ALUMNO'?'role-selection.html':'estudiantes.html')">Volver</button>
 <button id="btn-nueva">Nueva Nota</button>
 
@@ -22,7 +24,7 @@
       <th>Observación</th>
       <th>Valor</th>
       <th>%</th>
-      <th id="th-acciones">Acciones</th>
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody id="tabla-notas"></tbody>
@@ -33,15 +35,16 @@
 
 <script>
   const token = localStorage.getItem('token');
-  const rol   = localStorage.getItem('rol');
+  const rol = localStorage.getItem('rol');
   const estId = localStorage.getItem('estudianteId');
+
   if (!token) {
-    location.href='role-selection.html';
+    location.href = 'role-selection.html';
   }
 
   document.getElementById('rol').textContent = rol;
 
-  // Mostrar nombre y apellido del estudiante inmediatamente si están en localStorage
+  // Mostrar nombre y apellido almacenado (si existe)
   const estNombre = localStorage.getItem('estudianteNombre');
   const estApellido = localStorage.getItem('estudianteApellido');
   if (estNombre && estApellido) {
@@ -54,30 +57,25 @@
     'Content-Type': 'application/json'
   };
 
-  // Si es ALUMNO, obtener los datos del estudiante
+  // Ocultar botón de nueva nota solo si es alumno
+  const btnNueva = document.getElementById('btn-nueva');
   if (rol === 'ALUMNO') {
-    document.getElementById('btn-nueva').style.display = 'none';
-    document.getElementById('th-acciones').style.display = 'none';
-
-    // Obtener datos del estudiante desde la API
-    fetch(`/api/estudiantes/${estId}`, { headers })
-      .then(r => r.json())
-      .then(est => {
-        document.getElementById('est-nombre').textContent = est.nombre;
-        document.getElementById('est-apellido').textContent = est.apellido;
-      });
+    btnNueva.style.display = 'none';
   } else {
-    document.getElementById('btn-nueva')
-            .addEventListener('click', () => location.href = `editar-nota.html?estudianteId=${estId}`);
-
-    // Si es profesor y no hay nombre en localStorage, obtenerlo
-    fetch(`/api/estudiantes/${estId}`, { headers })
-      .then(r => r.json())
-      .then(est => {
-        document.getElementById('est-nombre').textContent = est.nombre;
-        document.getElementById('est-apellido').textContent = est.apellido;
-      });
+    btnNueva.addEventListener('click', crear);
   }
+
+  function crear() {
+    location.href = `editar-nota.html?estudianteId=${estId}`;
+  }
+
+  // Obtener datos del estudiante desde la API (por si no estaban en localStorage)
+  fetch(`/api/estudiantes/${estId}`, { headers })
+    .then(r => r.json())
+    .then(est => {
+      document.getElementById('est-nombre').textContent = est.nombre;
+      document.getElementById('est-apellido').textContent = est.apellido;
+    });
 
   function loadNotas() {
     fetch(`/api/notas?estudianteId=${estId}`, { headers })
@@ -96,7 +94,7 @@
               <td>${n.observacion || ''}</td>
               <td>${n.valor}</td>
               <td>${n.porcentaje}</td>
-              ${rol !== 'ALUMNO' ? `<td>${acciones}</td>` : ''}
+              <td>${acciones}</td>
             </tr>`;
         });
       });

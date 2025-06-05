@@ -20,15 +20,15 @@ public class GlobalException {
         try {
             return pjp.proceed();
         } catch (EmailDuplicadoException ex) {
-            log.warn("Excepción controlada en {}: {}", pjp.getSignature(), ex.getMessage());
+            log.warn("Excepcion controlada en {}: {}", pjp.getSignature(), ex.getMessage());
             return ResponseEntity.badRequest().body(ex.getMessage());
         } catch (ResponseStatusException ex) {
             log.error("Error en {}: {}", pjp.getSignature(), ex.getReason());
             throw ex;
         } catch (Exception ex) {
-            log.error("Excepción no controlada en {}: {}", pjp.getSignature(), ex.getMessage(), ex);
+            log.error("Excepcion no controlada en {}: {}", pjp.getSignature(), ex.getMessage(), ex);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Ocurrió un error interno");
+                    .body("Ocurrio un error interno");
         }
     }
 }

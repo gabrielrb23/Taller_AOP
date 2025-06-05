@@ -38,7 +38,7 @@ public class EstudianteController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Estudiante> crear(@Valid @RequestBody Estudiante e) {
         if (repo.findByCorreo(e.getCorreo()).isPresent()) {
-            throw new EmailDuplicadoException("El correo electrónico ya está registrado: " + e.getCorreo());
+            throw new EmailDuplicadoException("El correo electronico ya esta registrado: " + e.getCorreo());
         }
         Estudiante guardado = repo.save(e);
         URI uri = URI.create("/api/estudiantes/" + guardado.getId());
@@ -52,12 +52,12 @@ public class EstudianteController {
             @PathVariable Long id,
             @Valid @RequestBody Estudiante e) {
         if (repo.findByCorreo(e.getCorreo()).isPresent() && !repo.findById(id).map(Estudiante::getCorreo).orElse("").equals(e.getCorreo())) {
-            throw new EmailDuplicadoException("El correo electrónico ya está registrado: " + e.getCorreo());
+            throw new EmailDuplicadoException("El correo electrónico ya esta registrado: " + e.getCorreo());
         }
         return repo.findById(id)
                 .map(orig -> {
                     e.setId(id);
-                    e.setNotas(orig.getNotas()); // Preservar las notas existentes
+                    e.setNotas(orig.getNotas());
                     return ResponseEntity.ok(repo.save(e));
                 })
                 .orElse(ResponseEntity.notFound().build());
