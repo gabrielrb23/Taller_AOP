@@ -21,7 +21,7 @@
   const token = localStorage.getItem('token');
   const role  = localStorage.getItem('rol');
   if (!token) {
-    location.href = 'role-selection.html';
+    location.href = 'login.html';
   }
   if (role === 'ALUMNO') {
     location.href = 'notas.html';
@@ -33,7 +33,7 @@
   document.getElementById('btn-nuevo')
           .addEventListener('click', () => location.href = 'editar-estudiante.html');
   document.getElementById('btn-volver')
-          .addEventListener('click', () => location.href = 'role-selection.html');
+          .addEventListener('click', () => location.href = 'login.html');
 
   // Metodo para obtener estudiantes
   fetch('/api/estudiantes', { headers })

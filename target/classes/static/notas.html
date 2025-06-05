@@ -14,7 +14,7 @@
 </h1>
 
 <!-- Botones disponibles para todos -->
-<button onclick="location.href=(rol==='ALUMNO'?'role-selection.html':'estudiantes.html')">Volver</button>
+<button onclick="location.href=(rol==='ALUMNO'?'login.html':'estudiantes.html')">Volver</button>
 <button id="btn-nueva">Nueva Nota</button>
 
 <table border="1">
@@ -39,7 +39,7 @@
   const estId = localStorage.getItem('estudianteId');
 
   if (!token) {
-    location.href = 'role-selection.html';
+    location.href = 'login.html';
   }
 
   document.getElementById('rol').textContent = rol;

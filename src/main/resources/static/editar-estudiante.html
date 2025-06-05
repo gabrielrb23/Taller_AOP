@@ -19,7 +19,7 @@
     const token = localStorage.getItem('token');
     const role  = localStorage.getItem('rol');
     if (!token) {
-        location.href='role-selection.html';
+        location.href='login.html';
     }
     if (role==='ALUMNO') {
         location.href='estudiantes.html';
